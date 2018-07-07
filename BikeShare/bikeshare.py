@@ -110,14 +110,14 @@ def time_stats(df):
 
     # Display the most common start hour
     print("\nStart Hour Statistics:")
-    print('Most Popular', df['Start Hour'].mode()[0])
+    print('Most Popular:', df['Start Hour'].mode()[0])
 
     # Additional statistics for trip duration
     print('Additional Statistics:\n', df['Start Hour'].describe())
 
     # Display the most common start hour
     print("\nEnd Hour Statistics:")
-    print('Most Popular', df['End Hour'].mode()[0])
+    print('Most Popular:', df['End Hour'].mode()[0])
 
     # Additional statistics for trip duration
     print('Additional Statistics:\n', df['End Hour'].describe())
@@ -139,8 +139,8 @@ def station_stats(df):
     print('Most Popular End Station:', df['End Station'].mode()[0])
 
     # Display most frequent combination of start station and end station trip
-    most_popular_combo = df.groupby(['Start Station', 'End Station']).agg(lambda x: stats.mode(x)[0][0])
-    print('Most Popular Combination of Start and End Station:', most_popular_combo)
+    most_popular_combo = df.groupby(['Start Station', 'End Station']).size().nlargest(5).reset_index(name='count')
+    print('Top Five Most Popular Combinations of Start and End Station:\n', most_popular_combo)
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -178,7 +178,7 @@ def user_stats(df):
     try:
         print('\nGender Total:\n', df['Gender'].value_counts())
     except:
-        print('Error retrieving Gender information from this data set')
+        print('\nError retrieving Gender information from this data set')
 
     # Display earliest, most recent, and most common year of birth
     try:
@@ -188,7 +188,7 @@ def user_stats(df):
         # Additional statistics for Birth Year
         print('Additional Statistics:\n', df['Birth Year'].describe())
     except:
-        print('Error retrieving Birth Year information from this data set')
+        print('\nError retrieving Birth Year information from this data set')
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
@@ -200,8 +200,12 @@ def main():
         df = load_data(city, month, day)
 
         try:
+            display_raw_data = input('\nWould you like to display the first ten rows of raw data? Enter Yes or No.\n')
+            if display_raw_data.strip(" ").lower() == 'yes':
+                pd.options.display.width = 110
+                print(df.head(10)[df.columns[0:9]])
             time_stats(df)
-            #station_stats(df)
+            station_stats(df)
             trip_duration_stats(df)
             user_stats(df)
         except Exception as e:
