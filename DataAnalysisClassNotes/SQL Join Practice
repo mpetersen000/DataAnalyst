@@ -1,5 +1,0 @@
-SELECT we.channel, we.occurred_at, a.name, a.primary_poc
-FROM web_events AS we
-JOIN accounts AS a
-ON we.account_id = a.id
-WHERE a.name = 'Walmart';
