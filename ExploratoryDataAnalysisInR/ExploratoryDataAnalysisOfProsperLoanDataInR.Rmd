@@ -1,0 +1,397 @@
+Prosper Loan Exploration by Michelle Petersen
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using in your analysis in this code
+# chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk. This
+# prevents the code from displaying in the knitted HTML output. You should set
+# echo=FALSE for all code chunks in your file, unless it makes sense for your
+# report to show the code that generated a particular plot.
+
+# The other parameters for "message" and "warning" should also be set to FALSE
+# for other code chunks once you have verified that each plot comes out as you
+# want it to. This will clean up the flow of your report.
+
+suppressMessages(library(ggplot2))
+suppressMessages(library(dplyr))
+suppressMessages(library(datasets))
+suppressMessages(library(RColorBrewer))
+suppressMessages(library(GGally))
+suppressMessages(library(scales))
+suppressMessages(library(memisc))
+suppressMessages(library(lubridate))
+suppressMessages(library(ggthemes))
+suppressMessages(library(gridExtra))
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+setwd("/Users/michellepetersen/DataAnalyst/ExploratoryDataAnalysisInR")
+prosper_loan_dataset <- read.csv('prosperLoanData.csv')
+```
+
+# Overview of the Prosper Loan Data Set
+
+This report explores the prosper loans dataset.  It contains a little over 
+113,000 loans with 81 variables on each loan, including loan amount, 
+interest rate, current loan status, borrower income, borrower employment status, 
+borrower credit history, and the latest payment information. \
+Click this link for list of all variable definitions: 
+[Prosper Loan Data - Variable Definitions.]( 
+https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit#gid=0)
+
+# Preliminary Exploration of the Full Dataset
+
+Perform a preliminary exploration of all the data by running a summary of 81 
+variables. After some initial analysis, I will choose 10-15 variables to 
+explore further. 
+
+```{r echo=FALSE, Preliminary_Exploration_Full_Dataset}
+str(prosper_loan_dataset)
+summary(prosper_loan_dataset)
+```
+For this report, I will focus my exploration on the information related to borrowers.
+I will do some comparison before and after the 2009-2010 financial crisis. 
+As you can see from the histogram below in looking at the LoanOriginationDate by 
+year, there is a gap for in 2009 where they were very few if any loans originated. 
+
+The variables I will be exploring are:
+
+- LoanOriginationDate
+- LoanStatus
+- BorrowerAPR
+- LenderYield
+- ListingCategory
+- BorrowerState
+- Occupation
+- IncomeVerifiable
+- DebtToIncomeRatio
+- EmploymentStatus
+- EmploymentStatusDuration
+- CreditScoreRangeLower
+- CreditScoreRangeUpper
+- IsBorrowerHomeowner
+- IncomeRange
+- LoanOriginalAmount
+- LoanCurrentDaysDelinquent
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Dataset_Preparation}
+prosper_loans <- data.frame(prosper_loan_dataset$LoanOriginationDate,
+                            prosper_loan_dataset$LoanStatus, 
+                            prosper_loan_dataset$BorrowerAPR,
+                            prosper_loan_dataset$LenderYield,
+                            prosper_loan_dataset$ListingCategory,
+                            prosper_loan_dataset$BorrowerState,
+                            prosper_loan_dataset$Occupation,
+                            prosper_loan_dataset$IncomeVerifiable,
+                            prosper_loan_dataset$DebtToIncomeRatio,
+                            prosper_loan_dataset$EmploymentStatus,
+                            prosper_loan_dataset$EmploymentStatusDuration,
+                            prosper_loan_dataset$CreditScoreRangeLower,
+                            prosper_loan_dataset$CreditScoreRangeUpper,
+                            prosper_loan_dataset$IsBorrowerHomeowner,
+                            prosper_loan_dataset$IncomeRange,
+                            prosper_loan_dataset$LoanOriginalAmount,
+                            prosper_loan_dataset$LoanCurrentDaysDelinquent)
+
+names(prosper_loans) <- c("OriginationDate",
+                            "LoanStatus", 
+                            "BorrowerAPR",
+                            "LenderYield",
+                            "Category",
+                            "BorrowerState",
+                            "Occupation",
+                            "IncomeVerifiable",
+                            "DebtToIncomeRatio",
+                            "EmploymentStatus",
+                            "EmploymentStatusDuration",
+                            "LowerCreditScoreRange",
+                            "UpperCreditScoreRange",
+                            "IsBorrowerHomeowner",
+                            "IncomeRange",
+                            "OriginalAmount",
+                            "DaysDelinquent")
+
+prosper_loans$OriginationDate <- strptime(as.character(prosper_loans$OriginationDate), 
+                                    format = "%Y-%m-%d %H:%M:%S")
+prosper_loans$OriginationDate <- as.Date(as.character(prosper_loans$OriginationDate), 
+                                    format = "%Y-%m-%d")
+prosper_loans$OriginationYear <- year(as.Date(as.character(prosper_loans$OriginationDate), 
+                                    format = "%Y-%m-%d"))
+prosper_loans$OriginationMonth <- month(as.Date(as.character(prosper_loans$OriginationDate), 
+                                    format = "%Y-%m-%d"))
+prosper_loans$OriginationBefore2009 <- ifelse(prosper_loans$OriginationYear < 2009, "pre-2009", "post-2009")
+prosper_loans$OriginationBefore2009 <- as.factor(prosper_loans$OriginationBefore2009)
+
+prosper_loans$Category <- 
+  factor(prosper_loans$Category,
+    levels =c (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
+    labels =c ("NotAvailable", "DebtConsolidation", "HomeImprovement",
+              "Business", "PersonalLoan", "StudentUse", "Auto", "Other",
+              "BabyAndAdoption", "Boat", "CosmeticProcedure", "EngagmentRing",
+              "GreenLoans", "HouseholdExpenses", "LargePurchases", "MedicalDental",
+              "Motorcycle", "RV", "Taxes", "Vacation", "WeddingLoan"))
+prosper_loans$LowerCreditScoreGroup <- cut(prosper_loans$LowerCreditScoreRange,
+                                        include.lowest = FALSE,   
+                                        breaks = c(0, 300, 579, 669, 739, 799, 850),
+                                        labels = c("NotAvailable", "VeryPoor", "Fair",
+                                                 "Good", "VeryGood", "Exceptional"))
+prosper_loans$UpperCreditScoreGroup <- cut(prosper_loans$UpperCreditScoreRange,
+                                        include.lowest = FALSE,
+                                        breaks = c(0, 300, 579, 669, 739, 799, 850),
+                                        labels  =c("NotAvailable", "VeryPoor", "Fair",
+                                                 "Good", "VeryGood", "Exceptional"))
+prosper_loans$IncomeRange <- ordered(prosper_loans$IncomeRange, 
+                                    levels = c("Not displayed", "Not employed", "$0", 
+                                        "$1-24,999", "$25,000-49,999",
+                                        "$50,000-74,999", "$75,000-99,999", "$100,000+"))
+str(prosper_loans)
+summary(prosper_loans)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_Loan_Origination_Date }
+ggplot(aes(x = OriginationDate, colour = OriginationBefore2009), data = prosper_loans) +
+  geom_histogram() +
+  scale_x_date(date_breaks = "years", date_labels = "%Y")
+
+ggplot(aes(x = OriginationMonth, colour = OriginationBefore2009), data = prosper_loans) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = 1:12)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_Pre_2009 }
+pre_2009_loans <- subset(prosper_loans, OriginationBefore2009 %in% c("pre-2009"))
+summary(pre_2009_loans)
+post_2009_loans <- subset(prosper_loans, OriginationBefore2009 %in% c("post-2009"))
+summary(post_2009_loans)
+
+ggplot(aes(x = BorrowerAPR), data = prosper_loans) +
+    geom_histogram() + 
+    facet_wrap(~ OriginationBefore2009)
+
+ggplot(aes(x = LenderYield), data = prosper_loans) +
+    geom_histogram() +
+    facet_wrap(~ OriginationBefore2009)
+
+ggplot(aes(x = IncomeRange, y = DebtToIncomeRatio), data = prosper_loans) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+    facet_wrap(~ OriginationBefore2009)
+
+ggplot(aes(x = pre_2009_loans$Occupation, y = pre_2009_loans$DaysDelinquent), data = pre_2009_loans) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggplot(aes(x = post_2009_loans$Occupation, y = post_2009_loans$DaysDelinquent), data = post_2009_loans) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(aes(x = pre_2009_loans$LowerCreditScoreRange, colour = pre_2009_loans$LowerCreditScoreGroup), 
+        data = pre_2009_loans) +
+    geom_histogram(binwidth = 25) + 
+    xlim(300, 900)
+ggplot(aes(x = post_2009_loans$LowerCreditScoreRange, colour = post_2009_loans$LowerCreditScoreGroup), 
+        data = post_2009_loans) +
+    geom_histogram(binwidth = 25) + 
+    xlim(300, 900)
+  
+ggplot(aes(x = pre_2009_loans$UpperCreditScoreRange, colour = pre_2009_loans$UpperCreditScoreGroup), 
+            data = pre_2009_loans) +
+    geom_histogram(binwidth = 25) + 
+    xlim(300, 900)
+ggplot(aes(x = post_2009_loans$UpperCreditScoreRange, colour = post_2009_loans$UpperCreditScoreGroup), 
+            data = post_2009_loans) +
+    geom_histogram(binwidth = 25) + 
+    xlim(300, 900)
+
+ggplot(aes(x = LoanStatus, y = BorrowerAPR, colour = UpperCreditScoreGroup), data = prosper_loans) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+ggplot(aes(x = Category, y = OriginalAmount), data = prosper_loans) +
+    geom_boxplot() +
+    scale_y_log10() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+    facet_wrap(~ OriginationBefore2009)
+
+ggplot(aes(x = pre_2009_loans$Occupation, y = pre_2009_loans$OriginalAmount), data = pre_2009_loans) +
+    geom_boxplot() +
+    scale_y_log10() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggplot(aes(x = post_2009_loans$Occupation, y = post_2009_loans$OriginalAmount), data = post_2009_loans) +
+    geom_boxplot() +
+    scale_y_log10() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(aes(x = pre_2009_loans$BorrowerState, y = pre_2009_loans$OriginalAmount), data = pre_2009_loans) +
+    scale_y_log10() +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+ggplot(aes(x = post_2009_loans$BorrowerState, y = post_2009_loans$OriginalAmount), data = post_2009_loans) +
+    scale_y_log10() +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+ggplot(aes(x = IncomeRange, y = OriginalAmount, colour = IncomeVerifiable), data = prosper_loans) +
+    geom_boxplot() +
+    scale_y_log10() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    facet_wrap(~ OriginationBefore2009)
+
+ggplot(aes(x = IncomeRange, y = LowerCreditScoreRange), data = prosper_loans) +
+    geom_boxplot() +
+    ylim(300, 900) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    facet_wrap(~ OriginationBefore2009)
+
+ggplot(aes(x = IncomeRange, y = UpperCreditScoreRange), data = prosper_loans) +
+    geom_boxplot() +
+    ylim(300, 900) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    facet_wrap(~ OriginationBefore2009)
+
+ggplot(aes(x = IsBorrowerHomeowner, y = OriginalAmount), data = prosper_loans) +
+    scale_y_log10() +
+    geom_boxplot() +
+    facet_wrap(~ OriginationBefore2009)
+```
+
+
+> **Tip**: Make sure that you leave a blank line between the start / end of
+each code block and the end / start of your Markdown text so that it is
+formatted nicely in the knitted text. Note as well that text on consecutive
+lines is treated as a single space. Make sure you have a blank line between
+your paragraphs so that they too are formatted for easy readability.
+
+# Univariate Analysis
+
+> **Tip**: Now that you've completed your univariate explorations, it's time to
+reflect on and summarize what you've found. Use the questions below to help you
+gather your observations and add your own if you have other thoughts!
+
+### What is the structure of your dataset?
+
+### What is/are the main feature(s) of interest in your dataset?
+
+### What other features in the dataset do you think will help support your \
+investigation into your feature(s) of interest?
+
+### Did you create any new variables from existing variables in the dataset?
+
+### Of the features you investigated, were there any unusual distributions? \
+Did you perform any operations on the data to tidy, adjust, or change the form \
+of the data? If so, why did you do this?
+
+
+# Bivariate Plots Section
+
+> **Tip**: Based on what you saw in the univariate plots, what relationships
+between variables might be interesting to look at in this section? Don't limit
+yourself to relationships between a main output feature and one of the
+supporting variables. Try to look at relationships between supporting variables
+as well.
+
+```{r echo=FALSE, Bivariate_Plots}
+set.seed(20022012)
+pre_2009_sample <- pre_2009_loans[sample(1:length(pre_2009_loans$OriginalAmount), 10000), ]
+pre_2009_sample$BorrowerState <- NA
+pre_2009_sample$Occupation <- NA
+
+post_2009_sample <- post_2009_loans[sample(1:length(post_2009_loans$OriginalAmount), 10000), ]
+post_2009_sample$BorrowerState <- NA
+post_2009_sample$Occupation <- NA
+
+ggcorr(pre_2009_sample, palette = "RdBu", label = TRUE, label_size = 3)  
+ggcorr(post_2009_sample, palette = "RdBu", label = TRUE, label_size = 3) 
+
+ggplot()
+
+```
+
+# Bivariate Analysis
+
+> **Tip**: As before, summarize what you found in your bivariate explorations
+here. Use the questions below to guide your discussion.
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
+
+
+# Multivariate Plots Section
+
+> **Tip**: Now it's time to put everything together. Based on what you found in
+the bivariate plots section, create a few multivariate plots to investigate
+more complex interactions between variables. Make sure that the plots that you
+create here are justified by the plots you explored in the previous section. If
+you plan on creating any mathematical models, this is the section where you
+will do that.
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \
+looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the \
+strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+> **Tip**: You've done a lot of exploration and have built up an understanding
+of the structure of and relationships between the variables in your dataset.
+Here, you will select three plots from all of your previous exploration to
+present here as a summary of some of your most interesting findings. Make sure
+that you have refined your selected plots for good titling, axis labels (with
+units), and good aesthetic choices (e.g. color, transparency). After each plot,
+make sure you justify why you chose each plot by describing what it shows.
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
+> **Tip**: Here's the final step! Reflect on the exploration you performed and
+the insights you found. What were some of the struggles that you went through?
+What went well? What was surprising? Make sure you include an insight into
+future work that could be done with the dataset.
+
+> **Tip**: Don't forget to remove this, and the other **Tip** sections before
+saving your final work and knitting the final report!
