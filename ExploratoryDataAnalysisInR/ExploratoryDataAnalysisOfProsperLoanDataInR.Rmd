@@ -1,29 +1,15 @@
 Prosper Loan Exploration by Michelle Petersen
 ========================================================
-
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
-# Load all of the packages that you end up using in your analysis in this code
-# chunk.
-
-# Notice that the parameter "echo" was set to FALSE for this code chunk. This
-# prevents the code from displaying in the knitted HTML output. You should set
-# echo=FALSE for all code chunks in your file, unless it makes sense for your
-# report to show the code that generated a particular plot.
-
-# The other parameters for "message" and "warning" should also be set to FALSE
-# for other code chunks once you have verified that each plot comes out as you
-# want it to. This will clean up the flow of your report.
-
 suppressMessages(library(ggplot2))
-suppressMessages(library(dplyr))
-suppressMessages(library(datasets))
-suppressMessages(library(RColorBrewer))
 suppressMessages(library(GGally))
-suppressMessages(library(scales))
-suppressMessages(library(memisc))
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
 suppressMessages(library(lubridate))
-suppressMessages(library(ggthemes))
+suppressMessages(library(psych))
+suppressMessages(library(pastecs))
 suppressMessages(library(gridExtra))
+suppressMessages(library(corrplot))
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -32,238 +18,409 @@ setwd("/Users/michellepetersen/DataAnalyst/ExploratoryDataAnalysisInR")
 prosper_loan_dataset <- read.csv('prosperLoanData.csv')
 ```
 
-# Overview of the Prosper Loan Data Set
+#Overview 
+This report explores the prosper loans dataset. According to Wikipedia, Prosper 
+Marketplace is a company in the peer-to-peer lending industry and operates 
+[Prosper.com.](https:www.Prosper.com) Borrowers request personal loans on 
+Prosper and investors can fund them.Prosper lists, collects and distributes 
+borrower payments and interest back to the loan investors. 
 
-This report explores the prosper loans dataset.  It contains a little over 
-113,000 loans with 81 variables on each loan, including loan amount, 
-interest rate, current loan status, borrower income, borrower employment status, 
-borrower credit history, and the latest payment information. \
+
+In December 2009 Prosper Loans changed its business model to use pre-set rates 
+determined solely by Prosper based on a formula evaluating each prospective 
+borrower's credit risk. Prosper Ratings, from lowest-risk to highest-risk, are 
+labeled AA, A, B, C, D, E, and HR ("High Risk").  New prospective borrowers 
+are required to have an FICO 8 credit score of at least 640, and existing borrowers 
+only need a score of 600 to request a loan. With these changes, investors choose 
+whether or not to invest at the rate which Prosper's loan pricing 
+algorithm assigns to the loan after it analyzes the borrower's credit report 
+and financial information.
+
+Prosper has provided a proprietary "Prosper Rating" based on the company's 
+estimation of that borrower's "estimated loss rate." 
+According to the company, that figure is determined by two scores: 
+* (1) the credit score, obtained from an official credit reporting agency
+* (2) the Prosper Score, figured in-house based on the Prosper population
+
+The data contains a little over 113,000 loans with 81 variables on each loan. \
 Click this link for list of all variable definitions: 
 [Prosper Loan Data - Variable Definitions.]( 
 https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit#gid=0)
 
-# Preliminary Exploration of the Full Dataset
+#Exploration of the Full Dataset
+In this section I will explore the full dataset.  After initial analysis, I will choose 10-15 variables to explore further. 
 
-Perform a preliminary exploration of all the data by running a summary of 81 
-variables. After some initial analysis, I will choose 10-15 variables to 
-explore further. 
-
-```{r echo=FALSE, Preliminary_Exploration_Full_Dataset}
-str(prosper_loan_dataset)
-summary(prosper_loan_dataset)
+###Dataset Size by Row and Column:
+```{r echo=FALSE, Preliminary_Exploration_Dataset_Size}
+dim(prosper_loan_dataset)
 ```
-For this report, I will focus my exploration on the information related to borrowers.
-I will do some comparison before and after the 2009-2010 financial crisis. 
-As you can see from the histogram below in looking at the LoanOriginationDate by 
-year, there is a gap for in 2009 where they were very few if any loans originated. 
+###Dataset Variables and Types:
+```{r echo=FALSE, Preliminary_Exploration_Dataset_Types}
+str(prosper_loan_dataset)
+```
 
-The variables I will be exploring are:
-
-- LoanOriginationDate
-- LoanStatus
-- BorrowerAPR
-- LenderYield
-- ListingCategory
-- BorrowerState
-- Occupation
-- IncomeVerifiable
-- DebtToIncomeRatio
-- EmploymentStatus
-- EmploymentStatusDuration
-- CreditScoreRangeLower
-- CreditScoreRangeUpper
-- IsBorrowerHomeowner
-- IncomeRange
-- LoanOriginalAmount
-- LoanCurrentDaysDelinquent
-
-```{r echo=FALSE, message=FALSE, warning=FALSE, Dataset_Preparation}
-prosper_loans <- data.frame(prosper_loan_dataset$LoanOriginationDate,
-                            prosper_loan_dataset$LoanStatus, 
-                            prosper_loan_dataset$BorrowerAPR,
-                            prosper_loan_dataset$LenderYield,
-                            prosper_loan_dataset$ListingCategory,
-                            prosper_loan_dataset$BorrowerState,
-                            prosper_loan_dataset$Occupation,
-                            prosper_loan_dataset$IncomeVerifiable,
-                            prosper_loan_dataset$DebtToIncomeRatio,
-                            prosper_loan_dataset$EmploymentStatus,
-                            prosper_loan_dataset$EmploymentStatusDuration,
-                            prosper_loan_dataset$CreditScoreRangeLower,
-                            prosper_loan_dataset$CreditScoreRangeUpper,
-                            prosper_loan_dataset$IsBorrowerHomeowner,
-                            prosper_loan_dataset$IncomeRange,
-                            prosper_loan_dataset$LoanOriginalAmount,
-                            prosper_loan_dataset$LoanCurrentDaysDelinquent)
-
-names(prosper_loans) <- c("OriginationDate",
-                            "LoanStatus", 
-                            "BorrowerAPR",
-                            "LenderYield",
-                            "Category",
-                            "BorrowerState",
-                            "Occupation",
-                            "IncomeVerifiable",
-                            "DebtToIncomeRatio",
-                            "EmploymentStatus",
-                            "EmploymentStatusDuration",
-                            "LowerCreditScoreRange",
-                            "UpperCreditScoreRange",
-                            "IsBorrowerHomeowner",
-                            "IncomeRange",
-                            "OriginalAmount",
-                            "DaysDelinquent")
-
-prosper_loans$OriginationDate <- strptime(as.character(prosper_loans$OriginationDate), 
+###Full Dataset Statistical Summary Using stat.desc:
+```{r echo=FALSE, Preliminary_Exploration_Dataset_Statistical_Summary}
+stat.desc(prosper_loan_dataset)
+```
+```{r echo=FALSE, Preliminary_Exploration_Dataset_Transformation}
+prosper_loan_dataset$LoanOriginationDate <- strptime(as.character(prosper_loan_dataset$LoanOriginationDate), 
                                     format = "%Y-%m-%d %H:%M:%S")
-prosper_loans$OriginationDate <- as.Date(as.character(prosper_loans$OriginationDate), 
+prosper_loan_dataset$LoanOriginationDate <- as.Date(as.character(prosper_loan_dataset$LoanOriginationDate), 
                                     format = "%Y-%m-%d")
-prosper_loans$OriginationYear <- year(as.Date(as.character(prosper_loans$OriginationDate), 
+prosper_loan_dataset$OriginationYear <- year(as.Date(as.character(prosper_loan_dataset$LoanOriginationDate), 
                                     format = "%Y-%m-%d"))
-prosper_loans$OriginationMonth <- month(as.Date(as.character(prosper_loans$OriginationDate), 
+prosper_loan_dataset$OriginationMonth <- month(as.Date(as.character(prosper_loan_dataset$LoanOriginationDate), 
                                     format = "%Y-%m-%d"))
-prosper_loans$OriginationBefore2009 <- ifelse(prosper_loans$OriginationYear < 2009, "pre-2009", "post-2009")
-prosper_loans$OriginationBefore2009 <- as.factor(prosper_loans$OriginationBefore2009)
+prosper_loan_dataset$OriginationDay <- day(as.Date(as.character(prosper_loan_dataset$LoanOriginationDate), 
+                                    format = "%Y-%m-%d"))
+prosper_loan_dataset$OriginationBefore2010 <- ifelse(prosper_loan_dataset$OriginationYear < 2010, 
+    "pre-2010", "post-2010")
+prosper_loan_dataset$OriginationBefore2010 <- as.factor(prosper_loan_dataset$OriginationBefore2010)
 
-prosper_loans$Category <- 
-  factor(prosper_loans$Category,
+prosper_loan_dataset$LoanOriginationQuarter = factor(prosper_loan_dataset$LoanOriginationQuarter, 
+    levels = unique(prosper_loan_dataset$LoanOriginationQuarter[
+              order(prosper_loan_dataset$OriginationYear, prosper_loan_dataset$OriginationMonth)]),
+              ordered=TRUE)
+
+prosper_loan_dataset$ListingCategory <- 
+  factor(prosper_loan_dataset$ListingCategory,
     levels =c (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
     labels =c ("NotAvailable", "DebtConsolidation", "HomeImprovement",
               "Business", "PersonalLoan", "StudentUse", "Auto", "Other",
               "BabyAndAdoption", "Boat", "CosmeticProcedure", "EngagmentRing",
               "GreenLoans", "HouseholdExpenses", "LargePurchases", "MedicalDental",
               "Motorcycle", "RV", "Taxes", "Vacation", "WeddingLoan"))
-prosper_loans$LowerCreditScoreGroup <- cut(prosper_loans$LowerCreditScoreRange,
+
+
+prosper_loan_dataset$LowerCreditScoreGroup <- cut(prosper_loan_dataset$CreditScoreRangeLower,
                                         include.lowest = FALSE,   
-                                        breaks = c(0, 300, 579, 669, 739, 799, 850),
-                                        labels = c("NotAvailable", "VeryPoor", "Fair",
-                                                 "Good", "VeryGood", "Exceptional"))
-prosper_loans$UpperCreditScoreGroup <- cut(prosper_loans$UpperCreditScoreRange,
+                                        breaks = c(0, 550, 649, 699, 749, 850),
+                                        labels = c("Bad", "Poor", "Fair",
+                                                 "Good", "Exceptional"))
+prosper_loan_dataset$UpperCreditScoreGroup <- cut(prosper_loan_dataset$CreditScoreRangeUpper,
                                         include.lowest = FALSE,
                                         breaks = c(0, 300, 579, 669, 739, 799, 850),
                                         labels  =c("NotAvailable", "VeryPoor", "Fair",
                                                  "Good", "VeryGood", "Exceptional"))
-prosper_loans$IncomeRange <- ordered(prosper_loans$IncomeRange, 
+
+prosper_loan_dataset$IncomeRange <- ordered(prosper_loan_dataset$IncomeRange, 
                                     levels = c("Not displayed", "Not employed", "$0", 
                                         "$1-24,999", "$25,000-49,999",
                                         "$50,000-74,999", "$75,000-99,999", "$100,000+"))
-str(prosper_loans)
-summary(prosper_loans)
-```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_Loan_Origination_Date }
-ggplot(aes(x = OriginationDate, colour = OriginationBefore2009), data = prosper_loans) +
+prosper_loan_dataset$LoanStatus <- ordered(prosper_loan_dataset$LoanStatus, 
+                                    levels = c("Cancelled", "Chargedoff", "Completed", 
+                                        "Current", "Defaulted", "FinalPaymentInProgress",
+                                        "Past Due (1-15 days)", "Past Due (16-30 days)", 
+                                        "Past Due (31-60 days)", "Past Due (61-90 days)",
+                                        "Past Due (91-120 days)", "Past Due (>120 days)"))
+
+badStandingGroup = c("Chargedoff", "Defaulted", "Past Due (1-15 days)", "Past Due (16-30 days)",
+                     "Past Due (31-60 days)", "Past Due (61-90 days)",
+                      "Past Due (91-120 days)", "Past Due (>120 days)")
+
+prosper_loan_dataset$LoanStatusGroup <- ifelse(prosper_loan_dataset$LoanStatus %in% badStandingGroup, 
+                                        "InDefault", "GoodStanding")
+
+prosper_loan_dataset$ProsperRating..Alpha <- ordered(prosper_loan_dataset$ProsperRating..Alpha, 
+                                    levels = c("N/A", "HR", "E", 
+                                        "D", "C", "B", "A", "AA"))
+prosper_loan_dataset$CreditGrade <- ordered(prosper_loan_dataset$CreditGrade, 
+                                    levels = c("N/A", "NC", "HR", "E", 
+                                        "D", "C", "B", "A", "AA"))
+
+pre_2010_loans <- subset(prosper_loan_dataset, OriginationBefore2010 %in% c("pre-2010"))
+post_2010_loans <- subset(prosper_loan_dataset, OriginationBefore2010 %in% c("post-2010"))
+```
+###Post-Transformation Dataset Variables and Types:
+```{r echo=FALSE, Post_Transformation_Dataset_Variables_Types}
+str(prosper_loan_dataset)
+```
+#Univariate Plots
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_LoanOriginationYear}
+ggplot(aes(x = LoanOriginationDate), data = prosper_loan_dataset) +
   geom_histogram() +
-  scale_x_date(date_breaks = "years", date_labels = "%Y")
+  scale_x_date(date_breaks = "years", date_labels = "%Y") +
+  ggtitle("Loan Origination Count by Year")
+```
 
-ggplot(aes(x = OriginationMonth, colour = OriginationBefore2009), data = prosper_loans) +
+####Analysis of Loan Origination Count by Year
+There is a suprising drop in loans in 2009.  In searching the news during that time 
+I found this [Prosper News Story:](http://archive.fortune.com/2009/04/28/technology/hempel_prosper.fortune/index.htm).  
+In October of 2009, the SEC forced Prosper.com, to stop brokering new loans temporarily 
+while it determined whether Prosper's loans should be classified as securities. After
+a six month quiet period Prosper was reopened to lenders and borrowers.  Prosper
+made other changes for its business inclunding only allowing borrowers with a credit score
+above 640 to request a loan.  I added cohorts for before 2010 and after 2010 to see
+what other interesting similarities and differences I could see in the data.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_LoanOriginationQuarter}
+ggplot(aes(colour = OriginationBefore2010, x = LoanOriginationQuarter, ..count..), 
+       data = prosper_loan_dataset) + 
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ggtitle("Loan Origination Count by Quarter")
+```
+
+#### Summary statistics for Loan Origination Quarter
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_LoanOriginationQuarter}
+summary(prosper_loan_dataset$LoanOriginationQuarter)
+```
+
+####Analysis of Loan Origination Count by Quarter
+I've added color differences in the graphs for before and after the re-open in 2010.  There is 
+a drop at the beginning of 2013 followed by fairly consistent growth in number of loans
+peaking at 14450 in Q4 of 2013. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_LoanOriginationMonth}
+ggplot(aes(x = OriginationMonth, colour = OriginationBefore2010), data = prosper_loan_dataset) +
   geom_histogram(binwidth = 1) +
-  scale_x_continuous(breaks = 1:12)
+  scale_x_continuous(breaks = 1:12) +
+  ggtitle("Loan Origination Count by Month")
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_Pre_2009 }
-pre_2009_loans <- subset(prosper_loans, OriginationBefore2009 %in% c("pre-2009"))
-summary(pre_2009_loans)
-post_2009_loans <- subset(prosper_loans, OriginationBefore2009 %in% c("post-2009"))
-summary(post_2009_loans)
+####Analysis of Loan Origination Count by Month
+January is the biggest month for new loans, followed by October and December. 
+I will look into post 2010 January loans below in the bivariate analysis section
+to see if there are any interesting trends.
 
-ggplot(aes(x = BorrowerAPR), data = prosper_loans) +
-    geom_histogram() + 
-    facet_wrap(~ OriginationBefore2009)
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_LoanOriginationDay}
+ggplot(aes(x = OriginationDay, colour = OriginationBefore2010), data = prosper_loan_dataset) +
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(breaks = 1:31) +
+  ggtitle("Loan Origination Count by Day of the Month")
+```
 
-ggplot(aes(x = LenderYield), data = prosper_loans) +
-    geom_histogram() +
-    facet_wrap(~ OriginationBefore2009)
+####Analysis of Loan Origination Count by Day of the Month
+The number of loans listed rises over the month and peaks on the 30th.
 
-ggplot(aes(x = IncomeRange, y = DebtToIncomeRatio), data = prosper_loans) +
-    geom_boxplot() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
-    facet_wrap(~ OriginationBefore2009)
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_LoanOriginalAmount}
+ggplot(aes(colour = OriginationBefore2010, x = LoanOriginalAmount), data = prosper_loan_dataset) +
+    geom_histogram(binwidth = 1000)  +
+    ggtitle("Loan Count by Loan Original Amount")
+```
 
-ggplot(aes(x = pre_2009_loans$Occupation, y = pre_2009_loans$DaysDelinquent), data = pre_2009_loans) +
-    geom_boxplot() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggplot(aes(x = post_2009_loans$Occupation, y = post_2009_loans$DaysDelinquent), data = post_2009_loans) +
-    geom_boxplot() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+#### Summary statistics for Loan Original Amount pre 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_LoanOriginalAmountPre}
+summary(pre_2010_loans$LoanOriginalAmount)
+```
 
-ggplot(aes(x = pre_2009_loans$LowerCreditScoreRange, colour = pre_2009_loans$LowerCreditScoreGroup), 
-        data = pre_2009_loans) +
-    geom_histogram(binwidth = 25) + 
-    xlim(300, 900)
-ggplot(aes(x = post_2009_loans$LowerCreditScoreRange, colour = post_2009_loans$LowerCreditScoreGroup), 
-        data = post_2009_loans) +
-    geom_histogram(binwidth = 25) + 
-    xlim(300, 900)
+#### Summary statistics for Loan Original Amount post 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_LoanOriginalAmountPost}
+summary(post_2010_loans$LoanOriginalAmount)
+```
+
+####Analysis of Loan Original Amount
+There is a difference in loan amount before 2010 and after 2010.  The minimum rmeains 
+the same at 1000$.  The mean increased from 6050 to 9190.  Post 2010 there are 
+spikes in number of loands at 4000$, 10000$, and 15000$. The max increased from 25000 to 35000.  
+The data is skewed to the right with a small number of loans greater than 25000$.
+I will drill into loans for 4000$ below in the bivariate section because that is an interesting amount.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_ListingCategory}
+ggplot(aes(x = ListingCategory, y = ..count../sum(..count..), colour = OriginationBefore2010),
+       data = subset(prosper_loan_dataset, !is.na(ListingCategory))) +
+  geom_bar(stacked = TRUE) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylab("Percentage") +
+  labs(title = "Percentage of Loans by Listing Category") 
+```
+
+#### Summary statistics for Listing Category pre 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_ListingCategoryPre}
+summary(pre_2010_loans$ListingCategory)
+```
+
+#### Summary statistics for Listing Category post 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_ListingCategoryPost}
+summary(post_2010_loans$ListingCategory)
+```
+
+####Analysis of Listing Category
+Prior to 2010 the listing category wasn't really informative since almost 17000 of the loans
+information is not available.  Post 2010 since there are only 20 loans where this information
+is not available.  The debt consolidation category is the largest with just over 50% of loans listed.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_LowerCreditScoreGroup}
+ggplot(data = prosper_loan_dataset, aes(colour = OriginationBefore2010, x = LowerCreditScoreGroup, ..count..)) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    ggtitle("Loan Count by Lower Credit Score")
+```
+
+#### Summary statistics for Lower Credit Score pre 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_CreditScoreRangeLowerPre}
+summary(pre_2010_loans$CreditScoreRangeLower)
+```
+
+#### Summary statistics for Lower Credit Score post 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_CreditScoreRangeLowerPost}
+summary(post_2010_loans$CreditScoreRangeLower)
+```
+
+####Analysis of Lower Credit Score
+Here are the Credit Score Ranges as defined by [experian, transunion, and equifax](https://www.creditsesame.com/blog/credit/credit-score-range-for-experian-transunion-equifax/)
+* Bad 0 - 550
+* Poor 551 - 649
+* Fair 650 - 699
+* Good 700 - 749
+* Excellent 750 - 850
+
+Prior to 2010 loans were allowed to be listed with Proper for Borrowers "Bad" 
+credit rating.  According to the news article listed above, post 2010 new borrowers 
+were required to have a credit score of 640 and above.  Pre-2010 borrowers had a minimum
+credit score of 0 and 591 loans listed where the lower credit score was "Not Available". 
+The median rose from 640 pre-2010 to 700 post-2010.  For both pre-2010 and post-2010
+lower credit score the data is right skewed.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_UpperCreditScoreGroup}
+ggplot(data = prosper_loan_dataset, aes(colour = OriginationBefore2010, x = UpperCreditScoreGroup, ..count..)) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    ggtitle("Loan Count by Upper Credit Score")
+```
+
+#### Summary statistics for Upper Credit Score pre 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_CreditScoreRangeUpperPre}
+summary(pre_2010_loans$CreditScoreRangeUpper)
+```
+
+#### Summary statistics for Upper Credit Score post 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_CreditScoreRangeUpperPost}
+summary(post_2010_loans$CreditScoreRangeUpper)
+```
+
+####Analysis of Upper Credit Score
+Pre-2010 borrowers had a upper credit score median of 659 while post-2010 borrowers
+had a median upper credit score of 719. The upper credit score values look normally
+distributed.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_CreditGrade}
+ggplot(aes(x = CreditGrade, y = ..count../sum(..count..)),
+       data = subset(pre_2010_loans, !is.na(CreditGrade))) +
+  geom_bar() +
+  labs(title = "Percentage of Loans by Credit Grade (pre-2010)") +
+  ylab("Percentage")
+```
+
+#### Summary statistics for Credit Grade pre 2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_CreditGrade}
+summary(pre_2010_loans$CreditGrade)
+```
+
+####Analysis of Credit Grade
+The Credit Grade is the rating that was assigned to pre-2010 loans at the time the 
+listing went live. I could not determine via internet search how the Credit Grade was determined.
+Credit Grade, from lowest-risk to highest-risk, are labeled AA, A, B, C, D, E, 
+HR ("High Risk"), and NC ("No Credit").
+
+There were 141 loans listed for "No Credit" borrowers with 3508 loans listed for "High Risk" borrowers.
+It is suprising how many loans were listed for borrowers in the lower Credit Grade groups.
+
+It will be interesting to see in the multivaro
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_ProsperRatingAlpha}
+ggplot(aes(x = ProsperRating..Alpha, y = ..count../sum(..count..)),
+       data = subset(post_2010_loans, !is.na(ProsperRating..Alpha))) +
+  geom_bar() +
+  ylab("Percentage") +
+  labs(title = 'Percentage of Loans by Prosper Rating (post-2010)') 
+```
+
+#### Summary statistics for Prosper Rating post-2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_ProsperRating..Alpha}
+summary(post_2010_loans$ProsperRating..Alpha)
+```
+
+####Analysis of Prosper Rating
+Prosper Ratings, from lowest-risk to highest-risk, are labeled AA, A, B, C, D, E, 
+and HR ("High Risk").  Post-2010 Prosper provides a proprietary "Prosper Rating" 
+based on the company's estimation of that borrower's "estimated loss rate." 
+
+According to the company, the Prosper Rating is determined by two scores: 
+* (1) the credit score, obtained from an official credit reporting agency
+* (2) the Prosper Score, figured in-house based on the Prosper population
+
+Even though Credit Rating and Prosper Rating look similar,I decided not to combine 
+them for my analysis since they were calculated differently and may show differences
+during multivariate analysis.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_ProsperScore}
+ggplot(aes(x = ProsperScore, y = ..count../sum(..count..)),
+       data = subset(post_2010_loans, !is.na(ProsperScore))) +
+  geom_bar() +
+  ylab("Percentage") + 
+  labs(title = 'Percent of Loans by Prosper Score (post-2010)') 
+```
+
+#### Summary statistics for Prosper Score post-2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_ProsperScore}
+summary(post_2010_loans$ProsperScore)
+```
+
+####Analysis of Prosper Score
+The Prosper Score is a custom risk score for post-2010 loans built using historical Prosper data. 
+The score ranges from 1-10, with 10 being the best, or lowest risk score.  It is interesting
+that the max is eleven and there are clearly some values in 11.  I will drill into loans with a
+score of 11 a bit more below during multivariate analysis.  The distribution of Prosper Score looks normal.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_IncomeRange}
+ggplot(aes(x = IncomeRange, y = ..count../sum(..count..), colour = OriginationBefore2010),
+       data = prosper_loan_dataset) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylab("Percentage") +
+  ggtitle('Percentage of Loans by Income Range') 
+```
+
+####Analysis of Income Range
+The distribution of Income Ranges is left skewed with over 50% of the loans falling
+into the 25,000$ - 75,000$ range.  Prior to 2010 almost 6% of loans didn't include 
+borrower income range information.  This does not appear to be the case post-2010 where
+loans do contain borrower income range information.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_BorrowerAPR}
+p1 <- ggplot(aes(x = BorrowerAPR, y = ..count../sum(..count..)),
+       data = subset(pre_2010_loans, !is.na(BorrowerAPR))) +
+  geom_histogram() +
+  ylab("Percentage") + 
+  ggtitle('Percentage Loans by Borrower APR (pre-2010') 
+
+p2 <- ggplot(aes(x = BorrowerAPR, y = ..count../sum(..count..)),
+       data = subset(post_2010_loans, !is.na(BorrowerAPR))) +
+  geom_histogram() +
+  ylab("Percentage") + 
+  ggtitle('Percentage Loans by Borrower APR (post-2010') 
   
-ggplot(aes(x = pre_2009_loans$UpperCreditScoreRange, colour = pre_2009_loans$UpperCreditScoreGroup), 
-            data = pre_2009_loans) +
-    geom_histogram(binwidth = 25) + 
-    xlim(300, 900)
-ggplot(aes(x = post_2009_loans$UpperCreditScoreRange, colour = post_2009_loans$UpperCreditScoreGroup), 
-            data = post_2009_loans) +
-    geom_histogram(binwidth = 25) + 
-    xlim(300, 900)
-
-ggplot(aes(x = LoanStatus, y = BorrowerAPR, colour = UpperCreditScoreGroup), data = prosper_loans) +
-    geom_boxplot() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
-
-ggplot(aes(x = Category, y = OriginalAmount), data = prosper_loans) +
-    geom_boxplot() +
-    scale_y_log10() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
-    facet_wrap(~ OriginationBefore2009)
-
-ggplot(aes(x = pre_2009_loans$Occupation, y = pre_2009_loans$OriginalAmount), data = pre_2009_loans) +
-    geom_boxplot() +
-    scale_y_log10() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggplot(aes(x = post_2009_loans$Occupation, y = post_2009_loans$OriginalAmount), data = post_2009_loans) +
-    geom_boxplot() +
-    scale_y_log10() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-ggplot(aes(x = pre_2009_loans$BorrowerState, y = pre_2009_loans$OriginalAmount), data = pre_2009_loans) +
-    scale_y_log10() +
-    geom_boxplot() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
-
-ggplot(aes(x = post_2009_loans$BorrowerState, y = post_2009_loans$OriginalAmount), data = post_2009_loans) +
-    scale_y_log10() +
-    geom_boxplot() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
-
-ggplot(aes(x = IncomeRange, y = OriginalAmount, colour = IncomeVerifiable), data = prosper_loans) +
-    geom_boxplot() +
-    scale_y_log10() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    facet_wrap(~ OriginationBefore2009)
-
-ggplot(aes(x = IncomeRange, y = LowerCreditScoreRange), data = prosper_loans) +
-    geom_boxplot() +
-    ylim(300, 900) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    facet_wrap(~ OriginationBefore2009)
-
-ggplot(aes(x = IncomeRange, y = UpperCreditScoreRange), data = prosper_loans) +
-    geom_boxplot() +
-    ylim(300, 900) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    facet_wrap(~ OriginationBefore2009)
-
-ggplot(aes(x = IsBorrowerHomeowner, y = OriginalAmount), data = prosper_loans) +
-    scale_y_log10() +
-    geom_boxplot() +
-    facet_wrap(~ OriginationBefore2009)
+grid.arrange(p1, p2, ncol=1)
 ```
 
+#### Summary statistics for Borrower APR pre-2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_BorrowerAPRPre}
+summary(pre_2010_loans$BorrowerAPR)
+```
 
-> **Tip**: Make sure that you leave a blank line between the start / end of
-each code block and the end / start of your Markdown text so that it is
-formatted nicely in the knitted text. Note as well that text on consecutive
-lines is treated as a single space. Make sure you have a blank line between
-your paragraphs so that they too are formatted for easy readability.
+#### Summary statistics for Borrower APR post-2010
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Summary_BorrowerAPRPost}
+summary(post_2010_loans$BorrowerAPR)
+```
+
+####Analysis of Borrower APR
+FIXME
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots_LoanStatusGroup}
+ggplot(aes(x = LoanStatusGroup, y = ..count../sum(..count..)),
+       data = prosper_loan_dataset) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylab('Percentage') +
+  ggtitle("Percentage of Loans in Good Standing or In Default") + 
+  facet_wrap(~ OriginationBefore2010)
+```
 
 # Univariate Analysis
 
@@ -280,6 +437,11 @@ investigation into your feature(s) of interest?
 
 ### Did you create any new variables from existing variables in the dataset?
 
+###Post-Transformation Dataset Variables and Types:
+```{r echo=FALSE, Post_Transformation_Dataset_Variables_Types}
+str(prosper_loan_dataset)
+```
+
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
 of the data? If so, why did you do this?
@@ -293,21 +455,210 @@ yourself to relationships between a main output feature and one of the
 supporting variables. Try to look at relationships between supporting variables
 as well.
 
-```{r echo=FALSE, Bivariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_LoanStatusVSOriginalAmount}
+ggplot(aes(x = LoanStatus, y = LoanOriginalAmount, colour = OriginationBefore2010), data = prosper_loan_dataset) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_LoanStatusGroupVSOriginalAmount}
+ggplot(aes(x = LoanStatusGroup, y = LoanOriginalAmount, colour = OriginationBefore2010), data = prosper_loan_dataset) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_IncomeRangeVSOriginalAmount}
+ggplot(aes(x = IncomeRange, y = LoanOriginalAmount, colour = LoanStatusGroup), data = prosper_loan_dataset) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_IncomeRangeVSBorrowerAPRLS}
+ggplot(aes(x = IncomeRange, y = BorrowerAPR, colour = LoanStatusGroup), data = prosper_loan_dataset) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_IncomeRangeVSBorrowerAPR}
+ggplot(aes(x = IncomeRange, y = BorrowerAPR, colour = OriginationBefore2010), data = prosper_loan_dataset) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_ProsperScore}
+ggplot(aes(y = ProsperScore, x = LoanStatusGroup), data = post_2010_loans) +
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_CreditGrade}
+p1 = ggplot(aes(x = CreditGrade, y = ..count../sum(..count..), colour = LoanStatusGroup),
+       data = subset(pre_2010_loans, !is.na(CreditGrade))) +
+  geom_bar() +
+  ylab("Percentage") 
+
+p2 = ggplot(aes(x = ProsperRating..Alpha, y = ..count../sum(..count..), colour = LoanStatusGroup),
+       data = subset(post_2010_loans, !is.na(ProsperRating..Alpha))) +
+  geom_bar() +
+  ylab("Percentage") 
+
+grid.arrange(p1, p2, ncol=1)
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_ProsperRatingAlpha}
+p1 = ggplot(aes(x = ProsperRating..Alpha, y = ..count../sum(..count..), colour = UpperCreditScoreGroup),
+       data = subset(pre_2010_loans, !is.na(CreditGrade))) +
+  geom_bar() +
+  ylab("Percentage") 
+
+p2 = ggplot(aes(x = ProsperRating..Alpha, y = ..count../sum(..count..), colour = UpperCreditScoreGroup),
+       data = subset(post_2010_loans, !is.na(ProsperRating..Alpha))) +
+  geom_bar() +
+  ylab("Percentage") 
+
+grid.arrange(p1, p2, ncol=1)
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_CreditScoreRangeLower}
+ggplot(aes(x = LoanStatusGroup, y = CreditScoreRangeLower), data = prosper_loan_dataset) +
+    geom_boxplot() +
+    ylim(300, 900) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    facet_wrap(~ OriginationBefore2010)
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_CreditScoreRangeUpper}
+ggplot(aes(x = LoanStatusGroup, y = CreditScoreRangeUpper), data = prosper_loan_dataset) +
+    geom_boxplot() +
+    ylim(300, 900) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    facet_wrap(~ OriginationBefore2010)
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_LoanStatusBadStanding}
+mm <- model.matrix(~LoanStatusGroup - 1, prosper_loan_dataset)
+mm
+prosper_loan_dataset <- cbind(prosper_loan_dataset, mm)
+str(mm)
+
+prosper_loan_dataset.percentage_goodstanding_indefault_by_quarter <- prosper_loan_dataset %>%
+  group_by(LoanOriginationQuarter) %>%
+  summarise(good_standing_sum = sum(LoanStatusGroupGoodStanding),
+            in_default_sum = sum(LoanStatusGroupInDefault),
+            good_standing_percent = (good_standing_sum / (good_standing_sum + in_default_sum)),
+            in_default_percent = (in_default_sum / (good_standing_sum + in_default_sum)),
+            n = n()) %>%
+  arrange(LoanOriginationQuarter)
+str(prosper_loan_dataset.percentage_goodstanding_indefault_by_quarter)
+
+ggplot(colour = OriginationBefore2010, aes(x = LoanOriginationQuarter, 
+                                           y = LoanStatusGroupInDefault),
+       data = prosper_loan_dataset) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = 'Number of Loans in Default per Quarter') 
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_LoanStatusGoodStanding}
+ggplot(colour = OriginationBefore2010, aes(x = LoanOriginationQuarter, y = LoanStatusGroupGoodStanding),
+       data = prosper_loan_dataset) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = 'Number of Loans in Good Standing per Quarter') 
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots_Correlation}
 set.seed(20022012)
-pre_2009_sample <- pre_2009_loans[sample(1:length(pre_2009_loans$OriginalAmount), 10000), ]
-pre_2009_sample$BorrowerState <- NA
-pre_2009_sample$Occupation <- NA
 
-post_2009_sample <- post_2009_loans[sample(1:length(post_2009_loans$OriginalAmount), 10000), ]
-post_2009_sample$BorrowerState <- NA
-post_2009_sample$Occupation <- NA
+prosper_loan_dataset$IncomeVerifiableNumeric <- as.numeric(prosper_loan_dataset$IncomeVerifiable)
+prosper_loan_dataset$CreditGradeNumeric <- as.numeric(prosper_loan_dataset$CreditGrade)
+prosper_loan_dataset$EmploymentStatusNumeric <- as.numeric(prosper_loan_dataset$EmploymentStatus)
+prosper_loan_dataset$IncomeRangeNumeric <- as.numeric(prosper_loan_dataset$IncomeRange)
 
-ggcorr(pre_2009_sample, palette = "RdBu", label = TRUE, label_size = 3)  
-ggcorr(post_2009_sample, palette = "RdBu", label = TRUE, label_size = 3) 
+numeric_vars <- select_if(prosper_loan_dataset, is.numeric)
 
-ggplot()
+numeric_vars$ListingNumber <- NULL
+numeric_vars$BorrowerRate <- NULL
+numeric_vars$EstimatedEffectiveYield <- NULL
+numeric_vars$EstimatedLoss <- NULL                            
+numeric_vars$EstimatedReturn <- NULL           
+numeric_vars$LP_CustomerPayments <- NULL
+numeric_vars$LP_CustomerPrincipalPayments <- NULL
+numeric_vars$LP_InterestandFees <- NULL
+numeric_vars$LP_ServiceFees <- NULL
+numeric_vars$LP_CollectionFees <- NULL
+numeric_vars$LP_GrossPrincipalLoss <- NULL
+numeric_vars$LP_NetPrincipalLoss <- NULL
+numeric_vars$LP_NonPrincipalRecoverypayments <- NULL
+numeric_vars$PercentFunded <- NULL
+numeric_vars$InvestmentFromFriendsAmount <- NULL
+numeric_vars$OriginationDay <- NULL
+numeric_vars$OriginationYear <- NULL
+numeric_vars$CreditScoreRangeLower <- NULL
+numeric_vars$OpenRevolvingAccounts <- NULL
+numeric_vars$OpenRevolvingMonthlyPayment <- NULL
+numeric_vars$InquiriesLast6Months <- NULL
+numeric_vars$PublicRecordsLast10Years <- NULL
+numeric_vars$PublicRecordsLast12Months <- NULL
+numeric_vars$AmountDelinquent <- NULL
+numeric_vars$TotalCreditLinespast7years <- NULL
+numeric_vars$TotalTrades <- NULL
+numeric_vars$TotalInquiries <- NULL
+numeric_vars$TotalProsperPaymentsBilled <- NULL
+numeric_vars$ScorexChangeAtTimeOfListing <- NULL
+numeric_vars$LoanStatusBadStanding <- NULL
+numeric_vars$LoanNumber <- NULL
+numeric_vars$ListingCategory..numeric. <- NULL
+numeric_vars$EmploymentStatusDuration <- NULL
+numeric_vars$Term <- NULL
+numeric_vars$CurrentCreditLines <- NULL
+numeric_vars$OpenCreditLines <- NULL
+numeric_vars$CurrentDelinquencies <- NULL
+numeric_vars$DelinquenciesLast7Years <- NULL
+numeric_vars$RevolvingCreditBalance <- NULL
+numeric_vars$BankcardUtilization <- NULL
+numeric_vars$AvailableBankcardCredit <- NULL
+numeric_vars$TradesOpenedLast6Month <- NULL
+numeric_vars$DebtToIncomeRatio <- NULL
+numeric_vars$StatedMonthlyIncome <- NULL
+numeric_vars$TotalProsperLoans <- NULL
+numeric_vars$LoanFirstDefaultedCycleNumber <- NULL
+numeric_vars$Recommendations <- NULL
+numeric_vars$InvestmentFromFriendsCount <- NULL
+numeric_vars$OriginationMonth <- NULL
+numeric_vars$OriginationMonth <- NULL
+numeric_vars$ProsperPrincipalBorrowed <- NULL
+numeric_vars$ProsperPrincipalOutstanding <- NULL
+numeric_vars$OnTimeProsperPayments <- NULL
+numeric_vars$ProsperPaymentsLessThanOneMonthLate <- NULL
+numeric_vars$ProsperPaymentsOneMonthPlusLate <- NULL
+numeric_vars$LoanMonthsSinceOrigination <- NULL
+numeric_vars$LoanCurrentDaysDelinquent <- NULL
 
+names(numeric_vars)
+
+#cor_2 <- rcorr(as.matrix(numeric_vars))
+#cor_2$r
 ```
 
 # Bivariate Analysis
