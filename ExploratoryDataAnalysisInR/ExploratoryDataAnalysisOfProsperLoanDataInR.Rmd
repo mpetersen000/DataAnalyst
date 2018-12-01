@@ -9,7 +9,7 @@ operates
 Prosper and investors can fund them. Prosper lists, collects and distributes 
 borrower payments and interest back to the loan investors. 
 
-The dataset contains a little over 113,000 loans with 81 variables on each 
+The dataset contains over 113,000 loans with 81 variables on each 
 loan. Click this link for list of all the variable definitions: 
 [Prosper Loan Data - Variable Definitions.](https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit#gid=0)
 
@@ -183,7 +183,7 @@ ggplot(aes(fill = OriginationBefore2010,
 
 ####Analysis of Loan Origination Count by Quarter
 I've added color differences in the graphs for before and after the re-open  
-in 2010.  There is a drop at the beginning of 2013 followed by fairly  
+in 2010.  There is a drop at in Q1 of 2013 followed by fairly  
 consistent growth in number of loans peaking at 14450 in Q4 of 2013. 
 
 ```{r echo=FALSE, message=FALSE, Univariate_Plots_LoanOriginationMonth}
@@ -230,15 +230,14 @@ summary(post_2010_loans$LoanOriginalAmount)
 ```
 
 ####Analysis of Loan Original Amount
-There is a difference in loan amount before 2010 and after 2010.  The minimum  
-loan amount pre-2010 and post-2010 remained the same at $1000. However, the  
-maximum loan amount increased from $25000 to $35000.  
+The minimum loan amount pre-2010 and post-2010 remained the same at $1000. 
+However, the maximum loan amount increased from $25000 to $35000.  
 
 The mean increased from $6050 to $9190.  Post-2010 there are spikes in number  
 of loans at $4000, $10000, and $15000. 
 
-For both pre-2010 and post-2010 data the distribution is skewed to the right  
-and a small number of loans greater than $25000.
+For both pre-2010 and post-2010 data, the distribution is right skewed and a 
+small number of loans were greater than $25000.
 
 ```{r echo=FALSE, message=FALSE, Univariate_Plots_ListingCategory}
 # Calculate percentage for y value
@@ -253,10 +252,10 @@ ggplot(aes(x = ListingCategory, y = 100 * (..count../sum(..count..)),
 
 ####Analysis of Listing Category
 Pre-2010 the listing category wasn't very informative. Almost 17000 of the 
-loans had a listing category of "Not Available".  Post-2010 since there are  
+loans had a Listing Category of "Not Available".  Post-2010 since there are  
 only 20 loans where this information is not available. 
 
-The debt consolidation category is the largest with a little over 50% of the  
+The "Debt Consolidation"" category is the largest with a little over 50% of the  
 loans listed.
 
 ```{r echo=FALSE, message=FALSE, Univariate_Plots_MonthlyLoanPayment}
@@ -295,8 +294,7 @@ ggplot(aes(x = Term, y = 100 * (..count../sum(..count..))),
 ```
 
 ####Analysis of Term
-Loans are for 1 year, 3 year or 5 years Terms. Almost 80% of loans are for a  
-3 year term.
+Loans are for 1, 3 or 5 year Terms. Almost 80% of loans are for a 3 year term.
 
 ```{r echo=FALSE, message=FALSE, Univariate_Plots_LowerCreditScoreGroup}
 # Use count for y value
@@ -317,7 +315,7 @@ summary(post_2010_loans$CreditScoreRangeLower)
 ```
 
 ####Analysis of Lower Credit Score
-Here are the Credit Score Ranges as defined by [experian, transunion, and equifax:](https://www.creditsesame.com/blog/credit/credit-score-range-for-experian-transunion-equifax/)
+Here are the Credit Score Ranges as defined by [Experian, TransUnion, and Equifax:](https://www.creditsesame.com/blog/credit/credit-score-range-for-experian-transunion-equifax/)
 
 * Bad 0 - 550
 * Poor 551 - 649
@@ -325,14 +323,14 @@ Here are the Credit Score Ranges as defined by [experian, transunion, and equifa
 * Good 700 - 749
 * Excellent 750 and above
 
-Pre-2010 loans were allowed to be listed with Proper for Borrowers with a  
-"Bad" credit rating. In addition there were 591 pre-2010 loans listed where  
-the lower credit score was "Not Available". 
+Pre-2010, loans could be listed with Proper for Borrowers with a  "Bad" credit 
+rating. There were 591 pre-2010 loans listed with a lower credit score of 
+"Not Available". 
 
 The median rose from 640 pre-2010 to 700 post-2010.  For pre-2010 lower credit  
 score data is skewed slightly to the right since the mean (648.2) is greater  
 than the median (640).  The post-2010 lower credit score data is normally  
-distributed - The median and mean are very close at 700 and 699 respectively.
+distributed - The median and mean are very close at 700 and 699.
 
 ```{r echo=FALSE, message=FALSE, Univariate_Plots_UpperCreditScoreGroup}
 # Use count for y value
@@ -354,7 +352,7 @@ summary(post_2010_loans$CreditScoreRangeUpper)
 ```
 
 ####Analysis of Upper Credit Score
-Pre-2010 borrowers had a upper credit score median of 659 while post-2010  
+Pre-2010 borrowers had an upper credit score median of 659 while post-2010  
 borrowers had a median upper credit score of 719. The upper credit score  
 values look normally distributed.
 
@@ -368,11 +366,10 @@ ggplot(aes(x = CreditGrade, y = 100 * (..count../sum(..count..))),
 ```
 
 ####Analysis of Credit Grade
-The Credit Grade is the rating that was assigned to pre-2010 loans at the  
-time the listing went live. I could not determine via the Prosper website  
-search how the Credit Grade was determined. Credit Grade, from lowest-risk  
-to highest-risk, are labeled AA, A, B, C, D, E, HR ("High Risk"), and NC  
-("No Credit").
+The Credit Grade wsa assigned to pre-2010 loans at the time the listing went 
+live. I could not determine via the Prosper website search how the Credit Grade 
+was determined. Credit Grade, from lowest-risk to highest-risk, are labeled AA, 
+A, B, C, D, E, HR ("High Risk"), and NC ("No Credit").
 
 There were 141 loans listed for No Credit "NC" borrowers with 3508 loans  
 listed for "HR" - High Risk borrowers. It is surprising how many loans were  
@@ -395,7 +392,7 @@ rate."
 
 According to the company, the Prosper Rating is determined by two scores:
 
-* the credit score, obtained from an official credit reporting agency
+* the credit score, from an official credit reporting agency
 * the Prosper Score, figured in-house based on the Prosper population
 
 Even though Credit Rating and Prosper Rating look similar, I decided not to  
@@ -418,7 +415,7 @@ summary(post_2010_loans$ProsperScore)
 
 ####Analysis of Prosper Score
 The Prosper Score is a custom risk score for post-2010 loans built using  
-historical Prosper data. The score ranges from 1-11, with 11 being the best,  
+historical Prosper data. The score ranges 1-11, with 11 being the best,  
 or lowest risk score. The Prosper score estimates the probability of a loan  
 going “bad,” where “bad” is the probability of going 60+ days past due within  
 the first twelve months from the date of loan origination. [Prosper Scorecard Link](https://www.prosper.com/plp/general-prosper_score/)
@@ -440,7 +437,7 @@ ggplot(aes(x = IncomeRange, y = 100 * (..count../sum(..count..)),
 The distribution of Income Ranges is left skewed with over 50% of the loans  
 falling in the $25,000 - $75,000 income ranges.  Prior to 2010 almost 6% of  
 loans didn't include borrower income range information.  This does not appear  
-to be the case post-2010 where loans do contain borrower income range  
+to be the case post-2010 where loans consistently have borrower income range 
 information.
 
 ```{r echo=FALSE, message=FALSE, Univariate_Plots_BorrowerRate}
@@ -480,7 +477,7 @@ Borrower Rate for pre-2010 loans was 17% which is lower than the median
 post-2010.  The interquartile range pre-2010 is 11.25% where post-2010 the  
 interquartile range is 12.09%.  
 
-It surprised me that Borrowers were paying a higher rate for a Prosper loan  
+It is surprising that Borrowers are paying a higher rate for a Prosper loan  
 post-2010 compared to pre-2010 since interests rates for things like mortgages  
 were lower. [Link to Historical Mortgage Rates.](https://www.valuepenguin.com/mortgages/historical-mortgage-rates)
 
@@ -504,9 +501,9 @@ grid.arrange(p1, p2, ncol=1)
 ```
 
 ####Analysis of Loan Status
-I defined a factor variable for loans in "GoodStanding"" vs "InDefault" to  
-group loans for further analysis.  I grouped loans as "InDefault" if the loan  
-status might affect a borrowers credit rating.
+I defined a factor variable for loan status grouping to simplify analysis.
+Loans are "InDefault" if the loan status might affect a borrowers credit 
+rating.  Otherwise the loan is in "Good Standing".
 
 Loans in the "InDefault" group:
 
@@ -523,9 +520,8 @@ Pre-2010 the percentage of loans "In Default" was about 35%.  Post-2010 about
 # Univariate Analysis
 
 ### What is the structure of your dataset?
-The prosper loans dataset contains 113937 rows and 81 variables.  There are 70  
-numeric variables and 26 factor variables.  The dataset met the criteria for  
-tidiness as defined  
+The prosper loans dataset contains 113937 rows and 81 variables - 70 numeric 
+and 26 factor variables.  The dataset met the criteria for tidiness as defined  
 [by Wikipedia here](https://en.wikipedia.org/wiki/Tidy_data).
 
 * Each variable you measure should be in one column.
@@ -535,13 +531,12 @@ tidiness as defined
 allows them to be linked.
 
 ### What is/are the main feature(s) of interest in your dataset?
-The main areas I am focused on are how the change in Prosper Loans business  
+The main areas I focused on are how the change in Prosper Loans business  
 affected their two customer groups - borrowers and lenders. 
 
-* Borrower - What features are of interest and may impact how much I will pay  
+* Borrower - What features are of interest and may impact how much it costs 
 to borrow money?
-* Lender - What features are of interest and may impact if the loan will get  
-paid back?
+* Lender - What features are of interest and may impact paying back the loan?
 
 * LoanOriginationDate
 * LoanStatus
@@ -566,7 +561,7 @@ investigation into your feature(s) of interest?
 * EmploymentStatus
 
 ### Did you create any new variables from existing variables in the dataset?
-Yes I created some new variables namely:
+Yes I created several new variables namely:
 
 * OriginationYear
 * OriginationMonth
@@ -658,7 +653,7 @@ ggplot(aes(x = ProsperRating..Alpha, y = BorrowerRate, colour = LoanStatusGroup)
 ```
 
 ####Analysis of Borrower Rate vs Credit Grade and Prosper Rating
-These two graphs show the relationship between Borrower Rating and the  
+The two graphs show the relationship between Borrower Rating and the  
 pre-2010 Credit Grade and post-2010 Prosper Rating.  The Borrower Rate for  
 Credit Grades "NC" through "E" were between 15% - 28%.  For Credit Grades D,  
 C, B, A, and AA there is downward stair step.  
@@ -704,7 +699,7 @@ ggplot(aes(x = ProsperScore,
 ```
 
 ####Analysis of Loan Status vs Prosper Rating, Credit Grade and Prosper Score
-These three graphs compare the loan status to each of the three variables  
+The three graphs compare the loan status to each of the three variables  
 measuring credit quality and risk.  The Credit Grade graph shows that the 35%  
 of defaults in loans pre-2010 occured across all the Credit Grades.  I was  
 surprised to see about 2% of loans in AA in default and made me question the  
@@ -712,14 +707,14 @@ validity of the rating. As I mentioned earlier in the report, I could not find
 details on how the Credit Grade was determined.  
 
 The Prosper Rating graph shows a decrease in loans "InDefault"" as the Prosper  
-Rating increases. This is more in line with what I would expect for a borrower  
+Rating increases. This plot more in line with what I would expect for a borrower  
 loan rating.  
 
 The Prosper Score is an internal scorecard and estimates the probability of a  
 loan going “bad,” but only looks at the possibility of a loan going bad within  
-the first year of the loan.  In the univariate analysis, we saw that almost  
-80% of the loans are for three years. As we can see in the chart above, loans  
-with a higher prosper score  six or above also had about a 1% default rate. If  
+the first year of the loan. The univariate Term graph showed almost 80% of 
+loans are for three years. As we can see in the chart above, loans with a 
+higher prosper score  six or above also had about a 1% default rate. If  
 prosper updated thier model to look at longer timelines, this score could be  
 more accurate and reduce the post-2010 10% default rate.
 
@@ -751,9 +746,9 @@ ggplot(aes(x = ProsperRating..Alpha,
 
 ####Analysis of Loan Original Amount vs Prosper Rating and Credit Grade
 I used a scatter plot with an alpha of 1/4 to plot Loan Original Amounts vs 
-the Credit Grade and Prosper Rating. The graph of Credit Grade shows a larger 
+the Credit Grade and Prosper Rating. The Credit Grade graph shows a larger 
 number of defaults for loan amounts greater than $5000 for Credit Grades B and  
-lower.  The higher loan amounts even across credit grades are more likely to  
+lower.  Higher loan amounts even across credit grades are more likely to  
 be "InDefault" as is shown by the predominantly blue color.  
 
 The Prosper Rating graph shows the much lower rates of default as we saw  
@@ -792,33 +787,33 @@ ggplot(aes(x = ProsperRating..Alpha,
 ```
 
 ####Analysis of Monthly Loan Payment vs Prosper Rating and Credit Grade
-For both plots, I only looked at Loans for $10000 to be able to compare Monthly  
-Loan Payments pre-2010 and post-2010.  I took the sqrt of the Monthly Loan  
-Payment to adjust for the skewness in the data.  The plot for Monthly Loan  
-Payments post-2010 shows that interquartile range for payments across all  
-Prosper Ratings are below $500. For pre-2010 loans there it was interesting  
-to see that interquartile range that are in default were all above $500.  We  
-can see from these charts that a monthly loan payment below $500 has an impact  
+For both plots, I only looked at Loans for $10000 to compare Monthly Loan 
+Payments pre-2010 and post-2010.  I took the sqrt of the Monthly Loan Payment 
+to adjust for the skewness in the data.  The plot for Monthly Loan Payments 
+post-2010 shows that interquartile range for payments across all 
+Prosper Ratings are below $500. For pre-2010 loans there it was interesting 
+to see that interquartile range that are in default were all above $500.  We 
+can see from these charts that a monthly loan payment below $500 has an impact 
 on keeping the loan in good standing.  
 
 # Bivariate Analysis
 
-### Talk about some of the relationships you observed in this part of the \ 
+### Talk about some of the relationships you observed in this part of the \
 investigation. How did the feature(s) of interest vary with other features in \
-the dataset?
+the dataset? 
 I summarized my findings after each plot or group of plot above.
 
 ### Did you observe any interesting relationships between the other features \
 (not the main feature(s) of interest)?
-The Monthly Loan Payment analysis was interesting. Having a payment amount 
-that the borrower can make each month has a big influence on keeping the loan 
+Analysis of Monthly Loan Payment was really interesting. Payment amounts 
+that a borrower can make each month has a big influence on keeping the loan 
 in good standing.
 
 ### What was the strongest relationship you found?
 The strongest relationship I found was BorrowerRate and ProsperRating. It 
 was interesting because if a borrower wanted to reduce the rate they paid it 
 wasn't as transparent to figure out what actions they could take. The Prosper 
-Rating is composed of the Credit Score and the Prosper Score.  If they want to 
+Rating is based on Credit Score and the Prosper Score.  If they want to 
 increase thier credit score they can call the credit service and see details. 
 For the Prosper Rating or Prosper Score it isn't as clear how those are 
 calculated and they affect the rate the borrower pays.
@@ -962,9 +957,10 @@ The second two plots looked at MonthlyLoanPayment vs Loan Original Amount by
 Loan Status for borrowers with a ProsperCore below 6.  Again I thought about 
 looking at this as if I were a data analyst for Prosper - There might be an 
 opportunity to refine the Loan Consolidation model to keep the payment 
-amounts lower.  The red line shows loans with the lowest prosper score and 
-therefore most likely to go bad but shows a trend upwards for the payment.  If
-the payments were lower perhaps the loans would be less risky.
+amounts lower.  The red line is for loans with the lowest prosper score and 
+the loans most likely to go bad.  As loan amounts increase it shows an upward
+trend for the montlyh payment.  If the payments were lower perhaps the loans 
+would be less risky.
 
 ### Were there any interesting or surprising interactions between features?
 
@@ -977,10 +973,10 @@ ProsperRating..numeric. The correlation between BorrowerRate and
 ProsperRating..numeric is strong at .92 R-squared. It was suprising the 
 correlation for Credit Score was so low at .29.  It would be a challenge as a 
 borrower to figure out how to get a better rate on the Prosper platform 
-without increased transparency into how those metrics are calculated.
+without increased transparency into how these metrics are calculated.
 
 The models I put together are simplistic at this point compared to the number 
-of variables associated with peer to peer lending but still insightful.  After 
+of variables associated with Peer to Peer lending but still insightful.  After 
 I get more experience with model development beyond linear regression I would 
 like to revisit this analysis. 
 
@@ -1029,9 +1025,9 @@ p1 + theme_economist() +
 ### Description Two
 For this plot I looked at loans before 2010.  I took the sqrt of the Monthly 
 Loan Payment to adjust for the skewness in the data.  It was interesting to 
-see the medians montly payment for loans in good standing and loans in default 
+see the medians monthly payment for loans in good standing and loans in default 
 drift as the monthly payment rose.  From this chart your can see that a lower 
-monthly payment has an impact on keeping the loan in good standing.
+monthly payment impacts the loan status.
 
 ### Plot Three
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
@@ -1051,50 +1047,50 @@ ggplot(aes(x = LoanOriginalAmount, y = MonthlyLoanPayment,
 ```
 
 ### Description Three
-For this plot I looked at loans originated after 2010.  The graph shows how 
-currently the monthly payment is correlated to the Loan Amount rather than how 
-if a borrower can consistently make monthly payments.  (The correlation 
-between Montly Loan Payment and Loan Original Amount when calculated with 
-cor.test was .91.) As loan amounts increase, monthly payments increase. 
+For this plot I looked at loans originated after 2010. The graph shows how 
+the monthly payment is correlated to the Loan Amount. The correlation 
+between Monthly Loan Payment and Loan Original Amount when calculated with 
+cor.test was .91. 
 
-Prosper already made an adjustment in 2010 to keep payments lower.  It would 
-be intesting for them to model if adding more options for Term and Monthly 
-payment amounts would futher reduce the post-2010 10% default rate.
+As loan amounts increase, monthly payments increase. 
+
+Prosper made an adjustment in 2010 to keep payments lower.  It would be 
+interesting for Prosper to model increasing the options for Term and Monthly 
+payments to further reduce the post-2010 10% default rate.
 
 ========================================================
 
 # Reflection
 
-For this exploratory data analysis I decided to take on one of the larger 
-data sets. With 81 variables to explore, it was easy to get off track and 
-look into each of the variables. It took a bit to figure out which variables 
-were important and I was afraid to miss an insight. I did alot of plots as a 
-result and many of them are not included because they not that useful. I 
-decided to keep my focus on questions I thought Prosper's customers would 
-care about.
+For this exploratory data analysis I decided to use one of the larger data 
+sets. There were 81 potential variables to explore. It was easy to get off 
+track and look into each of the variables. It took time to figure out which 
+variables were important and didn't want to miss an insight. I created numerous 
+plots as a result that are not included because they were a dead end. I decided 
+to focus on questions I thought Prosper's customers would care about.
 
 I was very surprised at the Peer to Peer business environment pre-2010 that 
-led to action from the SEC.  I found it incredibly helpful to have domain 
-knowledge for Peer to Peer Lending  and overview of the business - both 
-provided much needed context to what I was seeing in the data.
+led to action from the SEC.  It was necessary to have domain knowledge for Peer 
+to Peer Lending  and overview of the business - both provided much needed 
+context to what I was seeing in the data.
 
-The interesting models I would like to predict are more complex and outside 
-the scope of EDA.  For example the Prosper Score is an internal scorecard and 
+The interesting models I would like to predict are more complex and beyond 
+the scope of an EDA.  For example the Prosper Score is an internal scorecard and 
 estimates the probability of a loan going “bad,” where “bad” is the 
 probability of going 60+ days past due within the first twelve months from 
-the date of loan origination. This isn't helpful for loans that are 3 year or 
+the loan origination date. This isn't helpful for loans that are 3 year or 
 5 year in term.  The lenders would probably like a better score to predict if 
 it is likely that a loan will get paid off.  It would also be good to know if 
 focusing on lower monthly payments would help keep the loans in good standing. 
 The loans are not secured, Prosper has discontinued use of a secondary market, 
 and the lender is bearing the risk.
 
-What did go well is my EDA skills have improved.  I also have a much better 
+What went well - my EDA skills have improved. I have a much better 
 understanding of when to apply a transform to a variable and what plots to use 
 and in what circumstance. The example EDA projects were inspiring and I was 
-able to use a few tips.  I am excited to take on machine learning.  I would 
-like to develop a model that attempt to forecast what type of loans are likely 
-to stay in good standing as a future project.
+able to use a few tips.  I am excited to take on machine learning.  In the 
+future I would like to develop a model that would forecast what type of loans 
+are likely to stay in good standing.
 
 ### Additional References
 [https://www.prosper.com](https://www.prosper.com)
