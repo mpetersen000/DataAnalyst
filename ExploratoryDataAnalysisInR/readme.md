@@ -9,16 +9,16 @@ This project explores the Prosper loans dataset. According to Wikipedia, Prosper
 R
 
 ### Libraries
-ggplot2
-GGally
-dplyr
-tidyr
-slubridate
-gridExtra
-memisc
-pastecs
-ggthemes
-RColorBrewer
+ggplot2<br>
+GGally<br> 
+dplyr<br>
+tidyr<br>
+lubridate<br>
+gridExtra<br>
+memisc<br>
+pastecs<br>
+ggthemes<br>
+RColorBrewer<br>
 
 ### Software
 R Studio
