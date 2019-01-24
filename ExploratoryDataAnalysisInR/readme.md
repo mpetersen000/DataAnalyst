@@ -1,8 +1,24 @@
 # Overview
 
-Visualizations in Tableau on differences in Prosper Loans dataset before and after 2010 where they made a strategic change to the business. Analysis of the dataset can be found [here.](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/ExploratoryDataAnalysisInR)
+This project explores the Prosper loans dataset. According to Wikipedia, Prosper Marketplace is a company in the peer-to-peer lending industry and operates Prosper.com. Borrowers request personal loans on Prosper and investors can fund them. Prosper lists, collects and distributes borrower payments and interest back to the loan investors. The dataset contains over 113,000 loans with 81 variables on each loan. 
 
-### [Click to see the data story in Tableau](https://public.tableau.com/profile/mpetersen000#!/vizhome/TableauStoryforProsperLoans-Version3/ProsperLoanStory2)
+### Analysis Report
+[Link](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/blob/master/ExploratoryDataAnalysisInR/ExploratoryDataAnalysisOfProsperLoanDataInR.html)
+
+### Languages
+R
+
+### Libraries
+ggplot2
+GGally
+dplyr
+tidyr
+slubridate
+gridExtra
+memisc
+pastecs
+ggthemes
+RColorBrewer
 
 ### Software
-Tableau
+R Studio
