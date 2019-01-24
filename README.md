@@ -1,21 +1,31 @@
 
-***BikeShare***
+# Data Analyst Nanodegree Projects
+## *Insights from Data with Python, R, SQL, and Tableau*
 
-Uses Python to explore data related to bike share systems for three major cities in the United States—Chicago, New York City, and Washington using descriptive statistics.
+**[Data Story Telling in Tableau](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/ExploratoryDataAnalysisInR)**
 
-***Investigate the IMDB Dataset***
+Data story teling in Tableau of the Prosper Loan exploratory data analysis project.
 
-This dataset contains information about 10,000 movies collected from The Movie Database (TMDb), including user ratings and revenue. Uses python, numpy, pandas, and matplot lib to answer four questions for analysis.  
+**[Exploratory Data Analysis of Prosper Loans in R](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/ExploratoryDataAnalysisInR)**
 
-* Which genres are most popular from year to year?
-* Which genres have the highest vote average each month?
-* Which keywords are most frequent by decade?
-* What properties are associated with movies that have women directors?
+A complete exploratory data analysis in R of the Prosper Loan dataset.
 
-***Analyze A/B Test Results***
+**[Data Wrangling Of Twitter Data](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/DataWranglingOfTwitter_WeRateDogs)**
 
-Understand the results of an A/B test run by an e-commerce website. The company has developed a new web page in order to try and increase the number of users who "convert," meaning the number of users who decide to pay for the company's product. The goal is help the company understand if they should implement this new page, keep the old page, or perhaps run the experiment longer to make their decision.
+Full data analysis process of the WeRateDogs twitter feed including gathering, assessing, cleaning, analyzing, visualizing, and reporting. 
 
-***Testing a Perceptual Phenomenon - Analyzing the Stroop Effect***
+**[Investigate the TMDB Dataset](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/InvestigateTMDBDataset)**
 
-The Stroop test is used to examine interference on reading ability. Researchers use this test and the Trail Making Test for measuring cognitive dysfunction. In a Stroop task, participants are presented with a list of words, with each word displayed in a color of ink. The participant’s task is to say out loud the color of the ink in which the word is printed. The task has two conditions: a congruent words condition, and an incongruent words condition. In the congruent words condition, the words being displayed are color words whose names match the colors in which they are printed. In the incongruent words condition, the words displayed are color words whose names do not match the colors in which they are printed. In each case, we measure the time it takes to name the ink colors in equally-sized lists. Each participant will go through and record a time from each condition.
+Exploratory Analysis of  The Movie Database (TMDb)dataset.  The dataset contains information about 10,000 movies including user ratings and revenue.
+
+**[Analyze A/B Test Results](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/AnalyzeABTestResults)**
+
+Analyzes and reports on the results of an A/B test run by an e-commerce website. 
+
+**[Testing a Perceptual Phenomenon - Analyzing the Stroop Effect](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/TestPerceptualPhenomenon)**
+
+Uses descriptive statistics and performs a statistical test on the dataset based on a psychological phenomenon, the Stroop Effect.
+
+**[Bike Share Data Analysis](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/BikeShare)**
+
+Explores data related to bike share systems for three major cities in the United States—Chicago, New York City, and Washington using descriptive statistics.
