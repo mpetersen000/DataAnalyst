@@ -1,6 +1,6 @@
 
 # Data Analyst Nanodegree Projects
-## *Insights from Data with Python, R, SQL, and Tableau*
+### *Insights from Data with Python, R, SQL, and Tableau*
 
 **[Data Story Telling in Tableau](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/ExploratoryDataAnalysisInR)**
 
