@@ -19,4 +19,4 @@ timeit<br>
 [Jupyter Notebook - wrangle_act.ipynb](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/blob/master/DataWranglingOfTwitter_WeRateDogs/wrangle_act.ipynb)
 
 ### Project Report
-[View Reporthttps://github.com/mpetersen000/DataAnalystNanodegreeProjects/blob/master/DataWranglingOfTwitter_WeRateDogs/wrangle_report.pdf)
+[View Report](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/blob/master/DataWranglingOfTwitter_WeRateDogs/wrangle_report.pdf)
