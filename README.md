@@ -10,7 +10,7 @@ Data story teling in Tableau of the Prosper Loan exploratory data analysis proje
 
 A complete exploratory data analysis in R of the Prosper Loan dataset.
 
-**[Data Wrangling Of Twitter Data](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/DataWranglingOfTwitter_WeRateDogs)**
+**[Data Wrangling Of WeRateDogs Twitter Data](https://github.com/mpetersen000/DataAnalystNanodegreeProjects/tree/master/DataWranglingOfTwitter_WeRateDogs)**
 
 Full data analysis process of the WeRateDogs twitter feed including gathering, assessing, cleaning, analyzing, visualizing, and reporting. 
 
